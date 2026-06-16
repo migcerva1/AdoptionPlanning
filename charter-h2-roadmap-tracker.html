@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[Internal] Charter H2 2026 CAE planning</title>
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --bg-panel: #16161c;
+      --bg-card: #1c1c24;
+      --bg-card-hover: #22222c;
+      --bg-input: #121218;
+      --border: #2a2a35;
+      --text: #f4f4f8;
+      --text-2: #9898a8;
+      --text-3: #5c5c6e;
+      --orange: #f97316;
+      --orange-dim: rgba(249,115,22,.15);
+      --purple: #a855f7;
+      --purple-dim: rgba(168,85,247,.15);
+      --blue: #3b82f6;
+      --blue-dim: rgba(59,130,246,.15);
+      --pink: #ec4899;
+      --green: #22c55e;
+      --red: #ef4444;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --sidebar-w: 68px;
+      --topbar-h: 58px;
+      --te-blue: #4a8fd4;
+      --te-blue-deep: #003b5c;
+      --te-orange: #f68b1f;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .app-shell { display: flex; min-height: 100vh; }
+
+    /* ── Left sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 200;
+    }
+
+    .sidebar-logo {
+      width: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      flex-shrink: 0;
+    }
+
+    .te-logo-img {
+      display: block;
+      height: 32px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
+    .sidebar-logo .te-logo-img {
+      height: 36px;
+      width: 52px;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    /* ── ThousandEyes brand ── */
+    .te-brand {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      padding-right: 18px;
+      margin-right: 2px;
+      border-right: 1px solid var(--border);
+    }
+
+    @media (max-width: 720px) {
+      .te-brand { padding-right: 10px; margin-right: 0; border-right: none; }
+      .te-brand .te-logo-img { height: 26px; }
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .sidebar-btn {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+    }
+
+    .sidebar-btn:hover { background: var(--bg-card); color: var(--text-2); }
+    .sidebar-btn.active { background: var(--orange-dim); color: var(--orange); }
+
+    .sidebar-btn.add-btn {
+      background: var(--orange);
+      color: #fff;
+      margin-top: 8px;
+    }
+    .sidebar-btn.add-btn:hover { background: #ea580c; color: #fff; }
+
+    .sidebar-bottom { margin-top: auto; }
+
+    /* ── Main area ── */
+    .main-wrap {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      height: var(--topbar-h);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      gap: 20px;
+      background: var(--bg-panel);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .app-title {
+      font-size: .9375rem;
+      font-weight: 700;
+      white-space: nowrap;
+      color: var(--text);
+      letter-spacing: -.01em;
+      flex-shrink: 0;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .topbar-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .topbar-link {
+      text-decoration: none;
+      max-width: 100%;
+    }
+
+    .topbar-link span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 180px;
+    }
+
+    .topbar-link:hover {
+      background: #ea580c;
+      border-color: #ea580c;
+      color: #fff;
+    }
+
+    .search-wrap {
+      position: relative;
+    }
+
+    .search-wrap input {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 7px 14px 7px 36px;
+      color: var(--text);
+      font-size: .8125rem;
+      width: 200px;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+
+    .search-wrap input:focus { border-color: var(--orange); }
+    .search-wrap svg {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+    }
+
+    .icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all var(--transition);
+    }
+
+    .icon-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+    .notif-dot {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 7px; height: 7px;
+      background: var(--red);
+      border-radius: 50%;
+      border: 2px solid var(--bg-card);
+    }
+
+    .avatar-sm {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .75rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ── Content layout ── */
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 24px 28px 32px;
+      flex: 1;
+    }
+
+    .insights-row {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 20px;
+      min-width: 0;
+    }
+
+    .widget-full { min-width: 0; }
+
+    /* ── Profile banner ── */
+    .profile-banner {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .profile-banner .stats-row {
+      flex: 1;
+      min-width: 240px;
+      padding: 0 20px 20px;
+      margin: 0;
+    }
+
+    @media (min-width: 901px) {
+      .profile-banner .stats-row {
+        padding: 20px 20px 20px 0;
+        margin-left: auto;
+        max-width: 520px;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .insights-row { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .content { padding: 16px 16px 88px; gap: 16px; }
+      .topbar { padding: 0 16px; gap: 12px; height: auto; min-height: var(--topbar-h); flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; }
+      .toolbar-strip { padding: 0 16px; flex-wrap: wrap; }
+      .profile-widget { padding: 16px; }
+      .profile-greeting h2 { font-size: 1rem; }
+      .widget-header { padding: 14px 16px 0; }
+      .widget-body { padding: 14px 16px 16px; }
+      .summary-cards { padding: 0 16px; }
+      .bar-chart { padding: 0 16px 16px; height: 100px; }
+      .overlay { align-items: flex-end; padding: 0; }
+      .modal { max-height: 92vh; border-radius: var(--radius) var(--radius) 0 0; }
+      .modal-body { padding: 18px 16px; }
+      .modal-foot { padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
+      .btn, .sidebar-btn, .icon-btn { min-height: 44px; min-width: 44px; }
+    }
+
+    @media (max-width: 640px) {
+      .search-wrap input { width: 120px; font-size: .75rem; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .summary-cards { grid-template-columns: 1fr; }
+      .toolbar-strip { justify-content: space-between; }
+      .card-crud { opacity: 1; }
+      .card-crud button { padding: 8px; font-size: .75rem; }
+    }
+
+    /* Mobile: bottom nav instead of left sidebar */
+    @media (max-width: 768px) {
+      .main-wrap { margin-left: 0; }
+
+      .sidebar {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+        border-right: none;
+        border-top: 1px solid var(--border);
+      }
+
+      .sidebar-logo { display: none; }
+      .sidebar-nav {
+        flex-direction: row;
+        flex: 1;
+        justify-content: space-around;
+        gap: 0;
+      }
+      .sidebar-bottom {
+        margin-top: 0;
+        display: flex;
+        gap: 4px;
+      }
+      .sidebar-btn.add-btn { margin-top: 0; }
+    }
+
+    /* ── Widget shell ── */
+    .widget {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .widget-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 0;
+    }
+
+    .widget-title {
+      font-size: .9375rem;
+      font-weight: 600;
+    }
+
+    .widget-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .widget-edit-btn {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+    }
+
+    .widget-edit-btn:hover { background: var(--bg-card-hover); color: var(--orange); }
+
+    .widget-body { padding: 16px 20px 20px; }
+
+    /* ── Project cards ── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+      gap: 14px;
+      width: 100%;
+    }
+
+    .project-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      transition: border-color var(--transition);
+      cursor: default;
+      width: 100%;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .project-card:hover { border-color: #3a3a48; }
+
+    .project-tag {
+      display: inline-block;
+      font-size: .6875rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+
+    .tag-orange { background: var(--orange-dim); color: var(--orange); }
+    .tag-purple { background: var(--purple-dim); color: var(--purple); }
+    .tag-blue { background: var(--blue-dim); color: var(--blue); }
+    .tag-pink { background: rgba(236,72,153,.15); color: var(--pink); }
+    .tag-green { background: rgba(34,197,94,.15); color: var(--green); }
+    .tag-grey { background: rgba(92,92,110,.2); color: var(--text-2); }
+
+    .project-card h4 {
+      font-size: .875rem;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 6px;
+    }
+
+    .project-desc {
+      font-size: .75rem;
+      color: var(--text-2);
+      line-height: 1.45;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .checklist { list-style: none; margin-bottom: 14px; }
+
+    .checklist li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .75rem;
+      color: var(--text-2);
+      padding: 3px 0;
+    }
+
+    .checklist li::before {
+      content: '';
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .checklist li.done { color: var(--text-3); text-decoration: line-through; }
+    .checklist li.done::before { background: var(--green); border-color: var(--green); }
+
+    .project-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .avatar-group { display: flex; }
+
+    .avatar-group span {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 2px solid var(--bg-panel);
+      font-size: .5625rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: -6px;
+      color: var(--text-2);
+    }
+
+    .avatar-group span:first-child { margin-left: 0; }
+
+    .project-meta-icons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .6875rem;
+      color: var(--text-3);
+    }
+
+    .progress-mini {
+      height: 4px;
+      background: var(--bg);
+      border-radius: 2px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+
+    .progress-mini-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--purple), var(--orange));
+    }
+
+    .card-crud {
+      display: flex;
+      gap: 4px;
+      margin-top: auto;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .card-crud button {
+      flex: 1;
+      padding: 5px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-2);
+      font-size: .6875rem;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .card-crud button:hover { border-color: var(--orange); color: var(--orange); }
+    .card-crud button.del:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── Profile widget ── */
+    .profile-widget {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 20px;
+    }
+
+    .avatar-lg {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--orange), var(--pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .profile-greeting h2 {
+      font-size: 1.125rem;
+      font-weight: 700;
+    }
+
+    .profile-greeting p {
+      font-size: .75rem;
+      color: var(--text-2);
+      margin-top: 2px;
+    }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 1100px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-box {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-box .val {
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-box .lbl {
+      font-size: .625rem;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .stat-box .val.orange { color: var(--orange); }
+    .stat-box .val.purple { color: var(--purple); }
+    .stat-box .val.blue { color: var(--blue); }
+    .stat-box .val.green { color: var(--green); }
+
+    /* ── Overview widget ── */
+    .summary-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 0 20px;
+      margin-bottom: 16px;
+    }
+
+    .summary-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+
+    .summary-card .sc-label {
+      font-size: .6875rem;
+      color: var(--text-3);
+      margin-bottom: 6px;
+    }
+
+    .summary-card .sc-value {
+      font-size: 1.125rem;
+      font-weight: 700;
+    }
+
+    .summary-card .sc-change {
+      font-size: .6875rem;
+      color: var(--green);
+      margin-top: 4px;
+    }
+
+    .summary-card .sc-change.negative { color: var(--red); }
+
+    /* Bar chart */
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 120px;
+      padding: 0 20px 20px;
+    }
+
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .bar {
+      width: 100%;
+      border-radius: 6px 6px 2px 2px;
+      background: linear-gradient(180deg, var(--purple), var(--orange));
+      min-height: 4px;
+      transition: height .4s ease;
+      position: relative;
+    }
+
+    .bar-label {
+      font-size: .5625rem;
+      color: var(--text-3);
+    }
+
+    /* ── Status list widget ── */
+    .status-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-row .name {
+      font-size: .75rem;
+      color: var(--text-2);
+      min-width: 80px;
+    }
+
+    .status-row .bar-wrap {
+      flex: 1;
+      height: 8px;
+      background: var(--bg);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .status-row .bar-fill { height: 100%; border-radius: 4px; }
+    .status-row .count { font-size: .75rem; font-weight: 600; min-width: 20px; text-align: right; }
+
+    /* ── Toolbar strip ── */
+    .toolbar-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px 0;
+      margin-top: -8px;
+    }
+
+    .toolbar-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-left: auto;
+    }
+
+    @media (max-width: 640px) {
+      .topbar-link span { max-width: 120px; }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: .75rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      transition: all var(--transition);
+    }
+
+    .btn:hover { border-color: var(--orange); color: var(--orange); }
+    .btn-primary { background: var(--orange); border-color: var(--orange); color: #fff; }
+    .btn-primary:hover { background: #ea580c; color: #fff; }
+
+    .save-badge {
+      font-size: .6875rem;
+      color: var(--text-3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .save-badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    /* ── Modal ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition);
+    }
+
+    .overlay.open { opacity: 1; visibility: visible; }
+
+    .modal {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(16px);
+      transition: transform var(--transition);
+    }
+
+    .overlay.open .modal { transform: translateY(0); }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-head h2 { font-size: 1rem; }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-3);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+    }
+
+    .modal-close:hover { color: var(--text); background: var(--bg-card); }
+
+    .modal-body { padding: 22px; }
+
+    .form-group { margin-bottom: 16px; }
+
+    .form-group label {
+      display: block;
+      font-size: .6875rem;
+      font-weight: 600;
+      color: var(--text-2);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      color: var(--text);
+      font-size: .8125rem;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--orange); }
+
+    .form-group textarea { resize: vertical; min-height: 70px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+    .form-group input[type="range"] { padding: 0; accent-color: var(--orange); }
+
+    .range-val { text-align: right; font-size: .8125rem; font-weight: 600; color: var(--orange); }
+
+    .modal-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 14px 22px;
+      border-top: 1px solid var(--border);
+    }
+
+    .checklist-editor { display: flex; flex-direction: column; gap: 6px; }
+
+    .checklist-editor-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .checklist-editor-row input { flex: 1; }
+
+    .checklist-editor-row button {
+      background: none;
+      border: none;
+      color: var(--red);
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .add-line-btn {
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      color: var(--text-3);
+      font-size: .75rem;
+      padding: 6px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .add-line-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+    .dynamic-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .dynamic-item {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .dynamic-item.three-col { grid-template-columns: 1fr 80px 80px auto; }
+    .dynamic-item.four-col { grid-template-columns: 1fr 60px 60px 60px auto; }
+
+    .dynamic-item button {
+      background: none;
+      border: none;
+      color: var(--red);
+      cursor: pointer;
+      font-size: .75rem;
+    }
+
+    .hint { font-size: .6875rem; color: var(--text-3); margin-top: 4px; }
+
+    .empty-msg {
+      text-align: center;
+      padding: 32px;
+      color: var(--text-3);
+      font-size: .8125rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 11px 18px;
+      font-size: .8125rem;
+      z-index: 600;
+      transform: translateY(60px);
+      opacity: 0;
+      transition: all .3s;
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    .dropdown { position: relative; }
+
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      min-width: 150px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      transition: all var(--transition);
+      z-index: 50;
+    }
+
+    .dropdown.open .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+
+    .dropdown-item {
+      display: block;
+      width: 100%;
+      padding: 9px 14px;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: .8125rem;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .dropdown-item:hover { background: var(--bg-card-hover); }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo" title="Cisco ThousandEyes">
+      <img
+        class="te-logo-img"
+        src="thousandeyes-logo.png"
+        alt="Cisco ThousandEyes"
+        width="120"
+        height="36"
+      >
+    </div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-btn active" title="Dashboard">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      </button>
+      <button class="sidebar-btn" title="Projects" onclick="document.getElementById('projectsWidget').scrollIntoView({behavior:'smooth'})">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      </button>
+      <button class="sidebar-btn add-btn" title="Add Project" onclick="openProjectModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="sidebar-btn" title="Download" onclick="document.getElementById('downloadDropdown').classList.toggle('open')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-wrap">
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="te-brand" title="Cisco ThousandEyes" aria-label="Cisco ThousandEyes">
+        <img
+          class="te-logo-img"
+          src="thousandeyes-logo.png"
+          alt="Cisco ThousandEyes"
+          width="180"
+          height="32"
+        >
+      </div>
+      <h1 class="app-title" id="appTitle">[Internal] Charter H2 2026 CAE planning</h1>
+      <div class="topbar-links">
+        <a
+          class="btn btn-primary topbar-link"
+          id="caePlaybookLink"
+          href="https://cisco-my.sharepoint.com/:w:/r/personal/migcerva_cisco_com/_layouts/15/Doc.aspx?sourcedoc=%7BC46E4AC1-93AF-429D-83D7-BAC5E573965B%7D&file=Charter%20-%20CAE%20Workbook.docx&action=default&mobileredirect=true"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Open Charter CAE Playbook in SharePoint"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          <span>Charter CAE Playbook</span>
+        </a>
+        <a
+          class="btn btn-primary topbar-link"
+          id="caeWorkbookLink"
+          href="https://cisco-my.sharepoint.com/:x:/p/migcerva/IQCsYnyp2TN8S75WDFhmW1ixAQqDExO_dU5khCrroFGJhr0?e=bhjsdo"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Open Charter Issues Tracker in SharePoint"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/>
+          </svg>
+          <span>Charter Issues Tracker</span>
+        </a>
+      </div>
+      <div class="topbar-actions">
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="search" id="searchInput" placeholder="Search…">
+        </div>
+        <button class="icon-btn" title="Notifications"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notif-dot"></span></button>
+        <div class="avatar-sm" id="topAvatar" onclick="openWidgetEdit('profile')"></div>
+      </div>
+    </header>
+
+    <div class="toolbar-strip">
+      <div class="toolbar-right">
+        <span class="save-badge"><span class="dot" id="saveDot"></span><span id="saveText">Saved</span></span>
+        <div class="dropdown" id="downloadDropdown">
+          <button class="btn" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')">Download Data ▾</button>
+          <div class="dropdown-menu">
+            <button class="dropdown-item" onclick="downloadData('json')">JSON</button>
+            <button class="dropdown-item" onclick="downloadData('csv')">CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Profile & stats banner -->
+      <section class="widget widget-full" id="profileWidget">
+        <div class="widget-header" style="padding-bottom:0">
+          <span class="widget-title" style="font-size:.75rem;color:var(--text-3)">Profile & Stats</span>
+          <div class="widget-actions">
+            <button class="widget-edit-btn" title="Edit stats" onclick="openWidgetEdit('stats')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>
+            </button>
+            <button class="widget-edit-btn" title="Edit profile" onclick="openWidgetEdit('profile')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="profile-banner">
+          <div class="profile-widget">
+            <div class="avatar-lg" id="profileAvatar"></div>
+            <div class="profile-greeting">
+              <h2 id="profileGreeting">Hello, —</h2>
+              <p id="profileRole">—</p>
+            </div>
+          </div>
+          <div class="stats-row" id="statsRow"></div>
+        </div>
+      </section>
+
+      <!-- Projects -->
+      <section class="widget widget-full" id="projectsWidget">
+        <div class="widget-header">
+          <span class="widget-title" id="projectsWidgetTitle">Your projects</span>
+          <div class="widget-actions">
+            <button class="widget-edit-btn" title="Edit widget" onclick="openWidgetEdit('projects-meta')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="widget-edit-btn" title="Add project" onclick="openProjectModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="widget-body">
+          <div class="projects-grid" id="projectsContainer"></div>
+        </div>
+      </section>
+
+      <!-- Overview + Status -->
+      <div class="insights-row">
+        <section class="widget" id="overviewWidget">
+          <div class="widget-header">
+            <span class="widget-title" id="overviewWidgetTitle">Roadmap Overview</span>
+            <button class="widget-edit-btn" title="Edit overview" onclick="openWidgetEdit('overview')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          </div>
+          <div class="summary-cards" id="summaryCards"></div>
+          <div class="bar-chart" id="barChart"></div>
+        </section>
+
+        <section class="widget" id="statusWidget">
+          <div class="widget-header">
+            <span class="widget-title" id="statusWidgetTitle">Status Breakdown</span>
+            <button class="widget-edit-btn" title="Edit status widget" onclick="openWidgetEdit('status-meta')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          </div>
+          <div class="widget-body">
+            <div class="status-list" id="statusList"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Universal modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">Edit</h2>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modalSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'charter-h2-roadmap-v2';
+const STATUSES = ['Not Started', 'In Progress', 'Completed'];
+const TAG_COLORS = ['orange', 'purple', 'blue', 'pink', 'green', 'grey'];
+const STAT_COLORS = ['orange', 'purple', 'blue', 'green'];
+
+let data = {};
+let editingProjectId = null;
+let modalMode = null;
+let saveTimer = null;
+
+function uid() { return crypto.randomUUID(); }
+
+function getCharterProjects() {
+  return [
+    {
+      id: uid(),
+      name: 'Ramp up testing to increase usage consumption',
+      description: 'Increase customer testing consumption. Address devices not showing expected download speeds due to on-net server locations.',
+      tag: 'Testing',
+      tagColor: 'orange',
+      status: 'In Progress',
+      startDate: '2026-01-01',
+      endDate: '2026-12-31',
+      completion: 40,
+      notes: 'Caveats to fix: Customer noticed that multiple devices are not showing the download speed that they should. Also, this is due to on-net server locations. Customer needs to improve this.',
+      checklist: [
+        { id: uid(), text: 'Improve on-net server location coverage', done: false },
+        { id: uid(), text: 'Fix device download speed reporting', done: false }
+      ],
+      assignees: ['MC', 'EJ']
+    },
+    {
+      id: uid(),
+      name: 'Data extraction',
+      description: 'Customer data extraction workstream.',
+      tag: 'Data',
+      tagColor: 'purple',
+      status: 'In Progress',
+      startDate: '2026-01-01',
+      endDate: '2026-12-31',
+      completion: 25,
+      notes: 'TBD',
+      checklist: [],
+      assignees: ['MC', 'EJ']
+    },
+    {
+      id: uid(),
+      name: 'QBR Planning',
+      description: 'Quarterly business review planning.',
+      tag: 'Planning',
+      tagColor: 'blue',
+      status: 'Not Started',
+      startDate: '2026-01-01',
+      endDate: '2026-12-31',
+      completion: 0,
+      notes: 'TBD',
+      checklist: [],
+      assignees: ['MC', 'EJ']
+    }
+  ];
+}
+
+const PROJECTS_VERSION = 3;
+
+function defaultData() {
+  const d = {
+    appTitle: '[Internal] Charter H2 2026 CAE planning',
+    caePlaybook: {
+      label: 'Charter CAE Playbook',
+      url: 'https://cisco-my.sharepoint.com/:w:/r/personal/migcerva_cisco_com/_layouts/15/Doc.aspx?sourcedoc=%7BC46E4AC1-93AF-429D-83D7-BAC5E573965B%7D&file=Charter%20-%20CAE%20Workbook.docx&action=default&mobileredirect=true'
+    },
+    caeWorkbook: {
+      label: 'Charter Issues Tracker',
+      url: 'https://cisco-my.sharepoint.com/:x:/p/migcerva/IQCsYnyp2TN8S75WDFhmW1ixAQqDExO_dU5khCrroFGJhr0?e=bhjsdo'
+    },
+    profile: { name: 'Jonathan', role: 'CAE Planning Lead', initials: 'JC' },
+    widgets: {
+      projectsTitle: 'Your projects',
+      overviewTitle: 'Roadmap Overview',
+      statusTitle: 'Status Breakdown'
+    },
+    stats: [
+      { id: uid(), label: 'Total Projects', source: 'total', color: 'orange' },
+      { id: uid(), label: 'Completed', source: 'completed', color: 'green' },
+      { id: uid(), label: 'In Progress', source: 'inProgress', color: 'purple' },
+      { id: uid(), label: 'Not Started', source: 'notStarted', color: 'blue' }
+    ],
+    overview: {
+      cards: [
+        { id: uid(), label: 'Avg Completion', value: '0', unit: '%', change: '', positive: true, autoSource: 'avgCompletion' },
+        { id: uid(), label: 'Not Started', value: '0', unit: 'projects', change: '', positive: true, autoSource: 'notStarted' }
+      ],
+      chartAutoLast: true,
+      chart: [
+        { month: 'Jul', value: 20 }, { month: 'Aug', value: 35 },
+        { month: 'Sep', value: 48 }, { month: 'Oct', value: 55 },
+        { month: 'Nov', value: 72 }, { month: 'Dec', value: 90 }
+      ],
+      chartTitle: 'H2 Completion Trend'
+    },
+    projects: []
+  };
+
+  d.projects = getCharterProjects();
+  d.meta = { projectsVersion: PROJECTS_VERSION };
+
+  return d;
+}
+
+function load() {
+  let migrated = false;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    data = raw ? JSON.parse(raw) : defaultData();
+    if (data.activity) {
+      delete data.activity;
+      migrated = true;
+    }
+    if (data.widgets?.activityTitle) {
+      delete data.widgets.activityTitle;
+      migrated = true;
+    }
+    if (data.navTabs) {
+      delete data.navTabs;
+      delete data.activeNav;
+      migrated = true;
+    }
+    if (data.overview?.tabs) {
+      delete data.overview.tabs;
+      delete data.overview.activeTab;
+      migrated = true;
+    }
+    if (migrateAutoSources()) migrated = true;
+    if (migrateProjects()) migrated = true;
+    if (syncAllProjectStatuses()) migrated = true;
+    if (migrated || syncAutoFields()) persist(false);
+  } catch {
+    data = defaultData();
+    persist(false);
+  }
+}
+
+function getStatusFromCompletion(completion) {
+  const c = Math.max(0, Math.min(100, Number(completion) || 0));
+  if (c === 0) return 'Not Started';
+  if (c >= 100) return 'Completed';
+  return 'In Progress';
+}
+
+function applyCompletionStatus(project) {
+  const c = Math.max(0, Math.min(100, Number(project.completion) || 0));
+  project.completion = c;
+  const next = getStatusFromCompletion(c);
+  const changed = project.status !== next;
+  project.status = next;
+  return changed;
+}
+
+function syncAllProjectStatuses() {
+  let changed = false;
+  data.projects.forEach(p => {
+    if (applyCompletionStatus(p)) changed = true;
+  });
+  return changed;
+}
+
+function onCompletionChange(el) {
+  const val = parseInt(el.value, 10) || 0;
+  document.getElementById('pCompVal').textContent = val;
+  const display = document.getElementById('pStatusDisplay');
+  if (display) display.value = getStatusFromCompletion(val);
+}
+
+function migrateProjects() {
+  if ((data.meta?.projectsVersion || 0) >= PROJECTS_VERSION) return false;
+  data.projects = getCharterProjects();
+  data.meta = data.meta || {};
+  data.meta.projectsVersion = PROJECTS_VERSION;
+  return true;
+}
+
+function migrateAutoSources() {
+  let changed = false;
+  if (!data.appTitle || data.appTitle === 'Charter H2 2026 CAE planning') {
+    data.appTitle = '[Internal] Charter H2 2026 CAE planning';
+    changed = true;
+  }
+  if (!data.caePlaybook?.url) {
+    data.caePlaybook = {
+      label: 'Charter CAE Playbook',
+      url: 'https://cisco-my.sharepoint.com/:w:/r/personal/migcerva_cisco_com/_layouts/15/Doc.aspx?sourcedoc=%7BC46E4AC1-93AF-429D-83D7-BAC5E573965B%7D&file=Charter%20-%20CAE%20Workbook.docx&action=default&mobileredirect=true'
+    };
+    changed = true;
+  }
+  if (!data.caeWorkbook?.url) {
+    data.caeWorkbook = {
+      label: 'Charter Issues Tracker',
+      url: 'https://cisco-my.sharepoint.com/:x:/p/migcerva/IQCsYnyp2TN8S75WDFhmW1ixAQqDExO_dU5khCrroFGJhr0?e=bhjsdo'
+    };
+    changed = true;
+  } else if (data.caeWorkbook.label === 'Charter CAE Workbook') {
+    data.caeWorkbook.label = 'Charter Issues Tracker';
+    changed = true;
+  }
+  data.stats?.forEach(stat => {
+    if (stat.source === 'blocked') {
+      stat.source = 'notStarted';
+      if (/blocked|at risk/i.test(stat.label)) stat.label = 'Not Started';
+      changed = true;
+    }
+  });
+  data.overview?.cards?.forEach(card => {
+    if (card.autoSource) return;
+    if (/avg completion/i.test(card.label)) card.autoSource = 'avgCompletion';
+    if (/not started|at risk|blocked/i.test(card.label)) card.autoSource = 'notStarted';
+  });
+  data.overview?.cards?.forEach(card => {
+    if (card.autoSource === 'blocked') {
+      card.autoSource = 'notStarted';
+      changed = true;
+    }
+  });
+  if (data.overview && data.overview.chartAutoLast === undefined) {
+    data.overview.chartAutoLast = true;
+    changed = true;
+  }
+  return changed;
+}
+
+function syncAutoFields() {
+  let changed = false;
+
+  data.overview?.cards?.forEach(card => {
+    if (!card.autoSource) return;
+    const next = String(computeStat(card.autoSource));
+    if (card.value !== next) {
+      card.value = next;
+      changed = true;
+    }
+  });
+
+  if (data.overview?.chartAutoLast && data.overview.chart?.length) {
+    const avg = computeStat('avgCompletion');
+    const last = data.overview.chart[data.overview.chart.length - 1];
+    if (last && last.value !== avg) {
+      last.value = avg;
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
+function persist(showIndicator = true) {
+  syncAutoFields();
+  data.meta = data.meta || {};
+  data.meta.lastSaved = new Date().toISOString();
+  data.meta.version = 2;
+
+  try {
+    const payload = JSON.stringify(data);
+    localStorage.setItem(STORAGE_KEY, payload);
+    const check = localStorage.getItem(STORAGE_KEY);
+    if (check !== payload) throw new Error('Storage verification failed');
+  } catch (err) {
+    console.error('Persist failed:', err);
+    toast('Could not save — browser storage may be full');
+    if (showIndicator) updateSaveIndicator('error');
+    return false;
+  }
+
+  if (showIndicator) updateSaveIndicator('saved');
+  return true;
+}
+
+function save() {
+  persist(true);
+}
+
+function updateSaveIndicator(state) {
+  const dot = document.getElementById('saveDot');
+  const txt = document.getElementById('saveText');
+  if (!dot || !txt) return;
+
+  if (state === 'error') {
+    dot.style.background = 'var(--red)';
+    txt.textContent = 'Save failed';
+    return;
+  }
+
+  dot.style.background = 'var(--orange)';
+  txt.textContent = 'Saving…';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    dot.style.background = 'var(--green)';
+    const ts = data.meta?.lastSaved
+      ? new Date(data.meta.lastSaved).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    txt.textContent = 'Saved · ' + ts;
+  }, 400);
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function esc(s) {
+  const d = document.createElement('span');
+  d.textContent = s ?? '';
+  return d.innerHTML;
+}
+
+function computeStat(source) {
+  const p = data.projects;
+  switch (source) {
+    case 'total': return p.length;
+    case 'completed': return p.filter(x => x.status === 'Completed').length;
+    case 'inProgress': return p.filter(x => x.status === 'In Progress').length;
+    case 'notStarted': return p.filter(x => x.status === 'Not Started').length;
+    case 'avgCompletion': return p.length ? Math.round(p.reduce((a, x) => a + x.completion, 0) / p.length) : 0;
+    default: return 0;
+  }
+}
+
+function filteredProjects() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!q) return data.projects;
+  return data.projects.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    p.description.toLowerCase().includes(q) ||
+    p.status.toLowerCase().includes(q) ||
+    p.tag.toLowerCase().includes(q)
+  );
+}
+
+function render() {
+  const statusChanged = syncAllProjectStatuses();
+  syncAutoFields();
+  renderAppTitle();
+  renderTopbarLinks();
+  renderProfile();
+  renderStats();
+  renderOverview();
+  renderStatus();
+  renderProjects();
+  if (statusChanged) persist(false);
+}
+
+function renderAppTitle() {
+  document.title = data.appTitle || '[Internal] Charter H2 2026 CAE planning';
+  const titleEl = document.getElementById('appTitle');
+  if (titleEl) titleEl.textContent = data.appTitle || '[Internal] Charter H2 2026 CAE planning';
+}
+
+function renderTopbarLinks() {
+  const playbook = document.getElementById('caePlaybookLink');
+  if (playbook && data.caePlaybook) {
+    playbook.href = data.caePlaybook.url;
+    playbook.title = 'Open ' + (data.caePlaybook.label || 'CAE Playbook') + ' in SharePoint';
+    const label = playbook.querySelector('span');
+    if (label) label.textContent = data.caePlaybook.label || 'Charter CAE Playbook';
+  }
+  const workbook = document.getElementById('caeWorkbookLink');
+  if (workbook && data.caeWorkbook) {
+    workbook.href = data.caeWorkbook.url;
+    workbook.title = 'Open ' + (data.caeWorkbook.label || 'Charter Issues Tracker') + ' in SharePoint';
+    const label = workbook.querySelector('span');
+    if (label) label.textContent = data.caeWorkbook.label || 'Charter Issues Tracker';
+  }
+}
+
+function renderProfile() {
+  const { name, role, initials } = data.profile;
+  document.getElementById('profileAvatar').textContent = initials;
+  document.getElementById('topAvatar').textContent = initials;
+  document.getElementById('profileGreeting').textContent = 'Hello, ' + name;
+  document.getElementById('profileRole').textContent = role;
+}
+
+function renderStats() {
+  document.getElementById('statsRow').innerHTML = data.stats.map(s =>
+    `<div class="stat-box">
+      <div class="val ${s.color}">${computeStat(s.source)}</div>
+      <div class="lbl">${esc(s.label)}</div>
+    </div>`
+  ).join('');
+}
+
+function renderProjects() {
+  document.getElementById('projectsWidgetTitle').textContent = data.widgets.projectsTitle;
+  const items = filteredProjects();
+  const c = document.getElementById('projectsContainer');
+  if (!items.length) {
+    c.innerHTML = '<div class="empty-msg">No projects found. Click + to add one.</div>';
+    return;
+  }
+  c.innerHTML = items.map(p => `
+    <article class="project-card">
+      <span class="project-tag tag-${p.tagColor}">${esc(p.tag)} · ${esc(p.status)}</span>
+      <h4>${esc(p.name)}</h4>
+      <p class="project-desc">${esc(p.description || p.notes)}</p>
+      <div class="progress-mini"><div class="progress-mini-fill" style="width:${p.completion}%"></div></div>
+      <ul class="checklist">${(p.checklist || []).slice(0, 3).map(cl =>
+        `<li class="${cl.done ? 'done' : ''}">${esc(cl.text)}</li>`
+      ).join('')}</ul>
+      <div class="project-footer">
+        <div class="avatar-group">${(p.assignees || []).map(a => `<span>${esc(a)}</span>`).join('')}</div>
+        <div class="project-meta-icons">
+          <span>${p.completion}%</span>
+          <span>💬 ${(p.notes || '').length > 0 ? 1 : 0}</span>
+        </div>
+      </div>
+      <div class="card-crud">
+        <button onclick="openProjectModal('${p.id}')">Edit</button>
+        <button class="del" onclick="deleteProject('${p.id}')">Delete</button>
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderOverview() {
+  document.getElementById('overviewWidgetTitle').textContent = data.widgets.overviewTitle;
+  const ov = data.overview;
+  document.getElementById('summaryCards').innerHTML = ov.cards.map(c =>
+    `<div class="summary-card">
+      <div class="sc-label">${esc(c.label)}</div>
+      <div class="sc-value">${esc(c.value)}${c.unit ? ' <span style="font-size:.75rem;color:var(--text-3)">' + esc(c.unit) + '</span>' : ''}</div>
+      ${c.change ? `<div class="sc-change${c.positive ? '' : ' negative'}">${esc(c.change)}</div>` : ''}
+    </div>`
+  ).join('');
+  const max = Math.max(...ov.chart.map(x => x.value), 1);
+  document.getElementById('barChart').innerHTML = ov.chart.map(c =>
+    `<div class="bar-col">
+      <div class="bar" style="height:${(c.value / max) * 100}%"></div>
+      <span class="bar-label">${esc(c.month)}</span>
+    </div>`
+  ).join('');
+}
+
+function renderStatus() {
+  document.getElementById('statusWidgetTitle').textContent = data.widgets.statusTitle;
+  const max = Math.max(data.projects.length, 1);
+  const colors = { 'Not Started': 'var(--text-3)', 'In Progress': 'var(--orange)', 'Completed': 'var(--green)' };
+  document.getElementById('statusList').innerHTML = STATUSES.map(s => {
+    const n = data.projects.filter(p => p.status === s).length;
+    return `<div class="status-row">
+      <span class="name">${s}</span>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${(n/max)*100}%;background:${colors[s]}"></div></div>
+      <span class="count">${n}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ── Modals ── */
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  modalMode = null;
+  editingProjectId = null;
+}
+
+function openWidgetEdit(type) {
+  modalMode = type;
+  const body = document.getElementById('modalBody');
+  const saveBtn = document.getElementById('modalSave');
+
+  if (type === 'profile') {
+    document.getElementById('modalTitle').textContent = 'Edit Profile';
+    body.innerHTML = `
+      <div class="form-group"><label>Name</label><input id="fName" value="${esc(data.profile.name)}"></div>
+      <div class="form-group"><label>Role</label><input id="fRole" value="${esc(data.profile.role)}"></div>
+      <div class="form-group"><label>Initials (2 chars)</label><input id="fInitials" maxlength="3" value="${esc(data.profile.initials)}"></div>`;
+    saveBtn.onclick = () => {
+      data.profile.name = document.getElementById('fName').value.trim() || 'User';
+      data.profile.role = document.getElementById('fRole').value.trim();
+      data.profile.initials = document.getElementById('fInitials').value.trim().toUpperCase().slice(0, 3) || 'U';
+      finishEdit('Profile updated');
+    };
+  }
+
+  else if (type === 'projects-meta') {
+    document.getElementById('modalTitle').textContent = 'Edit Projects Widget';
+    body.innerHTML = `
+      <div class="form-group"><label>App Title</label><input id="fAppTitle" value="${esc(data.appTitle || '[Internal] Charter H2 2026 CAE planning')}"></div>
+      <div class="form-group"><label>CAE Playbook Label</label><input id="fPlaybookLabel" value="${esc(data.caePlaybook?.label || 'Charter CAE Playbook')}"></div>
+      <div class="form-group"><label>CAE Playbook URL</label><input id="fPlaybookUrl" value="${esc(data.caePlaybook?.url || '')}"><p class="hint">SharePoint link to the Charter CAE Playbook (Word doc)</p></div>
+      <div class="form-group"><label>CAE Workbook Label</label><input id="fWorkbookLabel" value="${esc(data.caeWorkbook?.label || 'Charter Issues Tracker')}"></div>
+      <div class="form-group"><label>CAE Workbook URL</label><input id="fWorkbookUrl" value="${esc(data.caeWorkbook?.url || '')}"><p class="hint">SharePoint link to the Charter Issues Tracker (Excel)</p></div>
+      <div class="form-group"><label>Widget Title</label><input id="fTitle" value="${esc(data.widgets.projectsTitle)}"></div>`;
+    saveBtn.onclick = () => {
+      data.appTitle = document.getElementById('fAppTitle').value.trim() || '[Internal] Charter H2 2026 CAE planning';
+      data.caePlaybook = {
+        label: document.getElementById('fPlaybookLabel').value.trim() || 'Charter CAE Playbook',
+        url: document.getElementById('fPlaybookUrl').value.trim()
+      };
+      data.caeWorkbook = {
+        label: document.getElementById('fWorkbookLabel').value.trim() || 'Charter Issues Tracker',
+        url: document.getElementById('fWorkbookUrl').value.trim()
+      };
+      data.widgets.projectsTitle = document.getElementById('fTitle').value.trim() || 'Your projects';
+      finishEdit('Projects widget updated');
+    };
+  }
+
+  else if (type === 'stats') {
+    document.getElementById('modalTitle').textContent = 'Edit Quick Stats';
+    body.innerHTML = `<div class="dynamic-list" id="statsEditor">${data.stats.map((s, i) => `
+      <div class="dynamic-item three-col" data-idx="${i}">
+        <input value="${esc(s.label)}" class="stat-label">
+        <select class="stat-source">
+          ${['total','completed','inProgress','notStarted','avgCompletion'].map(k =>
+            `<option value="${k}"${s.source===k?' selected':''}>${k}</option>`).join('')}
+        </select>
+        <select class="stat-color">
+          ${STAT_COLORS.map(c => `<option value="${c}"${s.color===c?' selected':''}>${c}</option>`).join('')}
+        </select>
+        <button onclick="removeStatRow(${i})">✕</button>
+      </div>`).join('')}</div>
+      <button class="add-line-btn" onclick="addStatRow()">+ Add stat</button>`;
+    saveBtn.onclick = saveStatsEdit;
+  }
+
+  else if (type === 'overview') {
+    document.getElementById('modalTitle').textContent = 'Edit Roadmap Overview';
+    const ov = data.overview;
+    body.innerHTML = `
+      <div class="form-group"><label>Widget Title</label><input id="fOvTitle" value="${esc(data.widgets.overviewTitle)}"></div>
+      <div class="form-group"><label>Summary Cards</label>
+        <div class="dynamic-list" id="cardsEditor">${ov.cards.map((c, i) => `
+          <div class="dynamic-item" data-idx="${i}" style="grid-template-columns:1fr 52px 52px 110px auto">
+            <input value="${esc(c.label)}" class="card-label">
+            <input value="${esc(c.value)}" class="card-value" ${c.autoSource ? 'readonly title="Auto-updated from projects"' : ''}>
+            <input value="${esc(c.unit || '')}" class="card-unit" placeholder="unit">
+            <select class="card-auto" title="Auto-update from projects">
+              <option value=""${!c.autoSource ? ' selected' : ''}>Manual</option>
+              ${['total','completed','inProgress','notStarted','avgCompletion'].map(k =>
+                `<option value="${k}"${c.autoSource===k?' selected':''}>Auto: ${k}</option>`).join('')}
+            </select>
+            <button onclick="removeOverviewCard(${i})">✕</button>
+          </div>`).join('')}</div>
+        <button class="add-line-btn" onclick="addOverviewCard()">+ Add card</button>
+        <p class="hint">Cards set to Auto sync from projects and are saved on every change.</p>
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" id="fChartAuto" ${ov.chartAutoLast ? 'checked' : ''}> Auto-update last chart bar from avg completion</label>
+      </div>
+      <div class="form-group"><label>Chart Data (month:value, one per line)</label>
+        <textarea id="fChart" rows="6">${ov.chart.map(c => c.month + ':' + c.value).join('\n')}</textarea>
+      </div>`;
+    saveBtn.onclick = saveOverviewEdit;
+  }
+
+  else if (type === 'status-meta') {
+    document.getElementById('modalTitle').textContent = 'Edit Status Widget';
+    body.innerHTML = `
+      <div class="form-group"><label>Widget Title</label><input id="fStTitle" value="${esc(data.widgets.statusTitle)}"></div>
+      <p class="hint">Status counts are computed from your projects. Edit project statuses via the project cards.</p>
+      <div style="margin-top:12px">
+        <button class="btn" style="width:100%;justify-content:center" onclick="closeModal();openWidgetEdit('stats')">Edit Quick Stats →</button>
+      </div>`;
+    saveBtn.onclick = () => {
+      data.widgets.statusTitle = document.getElementById('fStTitle').value.trim() || 'Status Breakdown';
+      finishEdit('Status widget updated');
+    };
+  }
+
+  document.getElementById('overlay').classList.add('open');
+}
+
+function finishEdit(msg) {
+  save();
+  render();
+  closeModal();
+  toast(msg);
+}
+
+/* Stats editor helpers */
+function addStatRow() {
+  data.stats.push({ id: uid(), label: 'New Stat', source: 'total', color: 'orange' });
+  openWidgetEdit('stats');
+}
+
+function removeStatRow(i) {
+  data.stats.splice(i, 1);
+  openWidgetEdit('stats');
+}
+
+function saveStatsEdit() {
+  const rows = document.querySelectorAll('#statsEditor .dynamic-item');
+  data.stats = Array.from(rows).map(row => ({
+    id: uid(),
+    label: row.querySelector('.stat-label').value.trim() || 'Stat',
+    source: row.querySelector('.stat-source').value,
+    color: row.querySelector('.stat-color').value
+  }));
+  finishEdit('Stats updated');
+}
+
+/* Overview editor helpers */
+function addOverviewCard() {
+  data.overview.cards.push({ id: uid(), label: 'New Metric', value: '0', unit: '', change: '', positive: true });
+  openWidgetEdit('overview');
+}
+
+function removeOverviewCard(i) {
+  data.overview.cards.splice(i, 1);
+  openWidgetEdit('overview');
+}
+
+function saveOverviewEdit() {
+  data.widgets.overviewTitle = document.getElementById('fOvTitle').value.trim() || 'Roadmap Overview';
+
+  const cardEls = document.querySelectorAll('#cardsEditor .dynamic-item');
+  data.overview.cards = Array.from(cardEls).map((el, i) => {
+    const prev = data.overview.cards[i] || {};
+    const autoSource = el.querySelector('.card-auto')?.value || '';
+    return {
+      id: prev.id || uid(),
+      label: el.querySelector('.card-label').value.trim(),
+      value: el.querySelector('.card-value').value.trim(),
+      unit: el.querySelector('.card-unit').value.trim(),
+      change: prev.change || '',
+      positive: prev.positive ?? true,
+      autoSource: autoSource || undefined
+    };
+  });
+
+  data.overview.chartAutoLast = document.getElementById('fChartAuto')?.checked ?? false;
+
+  data.overview.chart = document.getElementById('fChart').value.split('\n').filter(Boolean).map(line => {
+    const [month, val] = line.split(':');
+    return { month: (month || '').trim(), value: parseInt(val, 10) || 0 };
+  });
+
+  finishEdit('Overview updated');
+}
+
+/* ── Project CRUD ── */
+function openProjectModal(id) {
+  editingProjectId = id || null;
+  const p = id ? data.projects.find(x => x.id === id) : null;
+  modalMode = 'project';
+  document.getElementById('modalTitle').textContent = p ? 'Edit Project' : 'Add Project';
+
+  const checklistHtml = (p?.checklist || []).map((c, i) => `
+    <div class="checklist-editor-row">
+      <input type="checkbox" ${c.done ? 'checked' : ''} onchange="toggleCheck(this)">
+      <input value="${esc(c.text)}" class="cl-text">
+      <button type="button" onclick="this.parentElement.remove()">✕</button>
+    </div>`).join('');
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-group"><label>Project Name</label><input id="pName" value="${esc(p?.name || '')}" required></div>
+    <div class="form-group"><label>Description</label><textarea id="pDesc">${esc(p?.description || '')}</textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>Tag</label><input id="pTag" value="${esc(p?.tag || 'Platform')}"></div>
+      <div class="form-group"><label>Tag Color</label><select id="pTagColor">${TAG_COLORS.map(c =>
+        `<option value="${c}"${p?.tagColor===c?' selected':''}>${c}</option>`).join('')}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Start Date</label><input type="date" id="pStart" value="${p?.startDate || '2025-07-01'}"></div>
+      <div class="form-group"><label>End Date</label><input type="date" id="pEnd" value="${p?.endDate || '2025-12-31'}"></div>
+    </div>
+    <div class="form-group"><label>Completion</label><input type="range" id="pComp" min="0" max="100" step="5" value="${p?.completion ?? 0}" oninput="onCompletionChange(this)"><div class="range-val"><span id="pCompVal">${p?.completion ?? 0}</span>%</div></div>
+    <div class="form-group"><label>Status</label><input type="text" id="pStatusDisplay" readonly value="${esc(getStatusFromCompletion(p?.completion ?? 0))}"><p class="hint">Auto-set from completion: 0% Not Started · 1–99% In Progress · 100% Completed</p></div>
+    <div class="form-group"><label>Assignees (initials, comma-separated)</label><input id="pAssignees" value="${esc((p?.assignees||[]).join(', '))}"></div>
+    <div class="form-group"><label>Notes</label><textarea id="pNotes">${esc(p?.notes || '')}</textarea></div>
+    <div class="form-group"><label>Checklist</label><div class="checklist-editor" id="checklistEditor">${checklistHtml}</div><button type="button" class="add-line-btn" onclick="addChecklistRow()">+ Add item</button></div>`;
+
+  document.getElementById('modalSave').onclick = saveProject;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function toggleCheck(el) { el.dataset.done = el.checked; }
+
+function addChecklistRow() {
+  document.getElementById('checklistEditor').insertAdjacentHTML('beforeend', `
+    <div class="checklist-editor-row">
+      <input type="checkbox" onchange="toggleCheck(this)">
+      <input value="" class="cl-text" placeholder="Checklist item">
+      <button type="button" onclick="this.parentElement.remove()">✕</button>
+    </div>`);
+}
+
+function saveProject() {
+  const name = document.getElementById('pName').value.trim();
+  if (!name) { toast('Project name is required'); return; }
+  const start = document.getElementById('pStart').value;
+  const end = document.getElementById('pEnd').value;
+  if (start > end) { toast('End date must be after start'); return; }
+
+  const checklist = Array.from(document.querySelectorAll('#checklistEditor .checklist-editor-row')).map(row => ({
+    id: uid(),
+    text: row.querySelector('.cl-text').value.trim(),
+    done: row.querySelector('input[type=checkbox]').checked
+  })).filter(c => c.text);
+
+  const completion = parseInt(document.getElementById('pComp').value, 10) || 0;
+
+  const payload = {
+    name,
+    description: document.getElementById('pDesc').value.trim(),
+    tag: document.getElementById('pTag').value.trim() || 'General',
+    tagColor: document.getElementById('pTagColor').value,
+    startDate: start, endDate: end,
+    completion,
+    status: getStatusFromCompletion(completion),
+    notes: document.getElementById('pNotes').value.trim(),
+    assignees: document.getElementById('pAssignees').value.split(',').map(s => s.trim()).filter(Boolean),
+    checklist
+  };
+
+  if (editingProjectId) {
+    const idx = data.projects.findIndex(x => x.id === editingProjectId);
+    if (idx >= 0) data.projects[idx] = { ...data.projects[idx], ...payload };
+    toast('Project updated');
+  } else {
+    data.projects.push({ id: uid(), ...payload });
+    toast('Project added');
+  }
+  closeModal();
+  render();
+  persist(true);
+}
+
+function deleteProject(id) {
+  const p = data.projects.find(x => x.id === id);
+  if (!p || !confirm(`Delete "${p.name}"?`)) return;
+  data.projects = data.projects.filter(x => x.id !== id);
+  render();
+  persist(true);
+  toast('Project deleted');
+}
+
+/* ── Download ── */
+function downloadData(format) {
+  document.getElementById('downloadDropdown').classList.remove('open');
+  if (format === 'json') {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    triggerDl(blob, 'charter-h2-2026-cae-planning.json');
+  } else {
+    const headers = ['Name','Tag','Status','Start','End','Completion','Assignees','Description','Notes'];
+    const rows = data.projects.map(p => [
+      csvEsc(p.name), csvEsc(p.tag), csvEsc(p.status), p.startDate, p.endDate,
+      p.completion, csvEsc((p.assignees||[]).join(';')), csvEsc(p.description), csvEsc(p.notes)
+    ]);
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    triggerDl(new Blob([csv], { type: 'text/csv' }), 'charter-h2-2026-cae-planning.csv');
+  }
+}
+
+function csvEsc(v) {
+  const s = String(v ?? '');
+  return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function triggerDl(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Downloaded ' + name);
+}
+
+/* ── Events ── */
+document.getElementById('searchInput').addEventListener('input', render);
+document.getElementById('overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.addEventListener('click', () => document.getElementById('downloadDropdown')?.classList.remove('open'));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+window.addEventListener('beforeunload', () => persist(false));
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') persist(false);
+});
+
+load();
+render();
+if (data.meta?.lastSaved) {
+  updateSaveIndicator('saved');
+}
+</script>
+</body>
+</html>
